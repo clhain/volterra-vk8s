@@ -17,19 +17,19 @@ inputs:
     required: true
     default: 'create'
 outputs:
-  namespace-name:
-    description: "The name of the namespace."
-    value: ${{ steps.namespace-concat.outputs.final-name }}
-env:
-  VSITE: ${{ inputs.vsite }}
-  CLUSTER_NAME: ${{ inputs.name }}
-  NAMESPACE_NAME: ${{ inputs.namespace }}
+  cluster-name:
+    description: "The name of the vk8s cluster."
+    value: ${{ input.name }}
 runs:
   using: "composite"
   steps:
     - id: expand-template
       run: envsubst < ${{ github.action_path }}/vk8s.yml.tpl > ${{ github.action_path }}/vk8s.yml
       shell: bash
+      env:
+        VSITE: ${{ inputs.vsite }}
+        CLUSTER_NAME: ${{ inputs.name }}
+        NAMESPACE_NAME: ${{ inputs.namespace }}
     - id: create-cluster
       if: ${{ inputs.action == 'create' }}
       run: vesctl configuration create virtual_k8s -i ${{ github.action_path }}/vk8s.yml
