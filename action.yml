@@ -40,6 +40,9 @@ runs:
         chmod +x ${{ github.action_path }}/await_cluster.sh
         ${{ github.action_path }}/await_cluster.sh
       shell: bash
+      env:
+        CLUSTER_NAME: ${{ inputs.name }}
+        NAMESPACE_NAME: ${{ inputs.namespace }}
     - id: delete-cluster
       if: ${{ inputs.action == 'delete' }}
       run: vesctl configuration delete virtual_k8s -i ${{ github.action_path }}/vk8s.yml
