@@ -1,0 +1,44 @@
+name: 'SOME_COMPANY - Volterra Virtual Kubernetes Cluster'
+description: 'Interact with (create, delete) a Volterra vk8s cluster using vesctl and GitHub Actions'
+inputs:
+  name:
+    description: 'Whether to add a random uuid suffix to the name of the namespace to be created.'
+    required: true
+    default: volterra-vk8s-cluster
+  vsite:
+    description: 'The name of a VSITE reference to use for the cluster. Only shared namespace Refs are supported.'
+    required: true
+    default: ves-io-all-res
+  namespace:
+    description: 'The name of the volterra namespace containing the vk8s cluster.'
+    required: true
+  action:
+    description: 'The action to take on the volterra vk8s cluster (create or delete).'
+    required: true
+    default: 'create'
+outputs:
+  namespace-name:
+    description: "The name of the namespace."
+    value: ${{ steps.namespace-concat.outputs.final-name }}
+env:
+  VSITE: ${{ inputs.vsite }}
+  CLUSTER_NAME: ${{ inputs.name }}
+  NAMESPACE_NAME: ${{ inputs.namespace }}
+runs:
+  using: "composite"
+  steps:
+    - id: expand-template
+      run: envsubst < ${{ github.action_path }}/vk8s.yml.tpl > ${{ github.action_path }}/vk8s.yml
+      shell: bash
+    - id: create-cluster
+      if: ${{ inputs.action == 'create' }}
+      run: vesctl configuration create virtual_k8s -i ${{ github.action_path }}/vk8s.yml
+      shell: bash
+    - id: wait-for-cluster
+      if: ${{ inputs.action == 'create' }}
+      run: 'until vesctl configuration get virtual_k8s ${{ inputs.name }} --namespace ${{ inputs.namespace }} --outfmt yaml | grep -m 1 "pending: \[\]"; do echo "Waiting for cluster to be ready...""; sleep 10 ; done'
+      shell: bash
+    - id: delete-cluster
+      if: ${{ inputs.action == 'delete' }}
+      run: vesctl configuration delete virtual_k8s -i ${{ github.action_path }}/vk8s.yml
+      shell: bash
