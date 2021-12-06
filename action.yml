@@ -38,7 +38,6 @@ runs:
       if: ${{ inputs.action == 'create' }}
       run: 'until vesctl configuration get virtual_k8s ${{ inputs.name }} --namespace ${{ inputs.namespace }} --outfmt yaml | grep -qm 1 "pending: \[\]"; do echo "Waiting for cluster to be ready..." && sleep 10 ; done'
       shell: bash
-      timeout-minutes: 3
     - id: delete-cluster
       if: ${{ inputs.action == 'delete' }}
       run: vesctl configuration delete virtual_k8s -i ${{ github.action_path }}/vk8s.yml
