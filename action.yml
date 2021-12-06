@@ -36,7 +36,7 @@ runs:
       shell: bash
     - id: wait-for-cluster
       if: ${{ inputs.action == 'create' }}
-      run: 'until vesctl configuration get virtual_k8s ${{ inputs.name }} --namespace ${{ inputs.namespace }} --outfmt yaml | grep -m 1 "pending: \[\]"; do echo "Waiting for cluster to be ready...""; sleep 10 ; done'
+      run: 'until vesctl configuration get virtual_k8s ${{ inputs.name }} --namespace ${{ inputs.namespace }} --outfmt yaml | grep -m 1 "pending: \[\]"; do echo "Waiting for cluster to be ready..."; sleep 10 ; done'
       shell: bash
     - id: delete-cluster
       if: ${{ inputs.action == 'delete' }}
